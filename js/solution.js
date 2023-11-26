@@ -5,7 +5,7 @@ function iniciarApp() {
     let favoritePage = false;
     const resultado = document.querySelector("#resultado");
     const selectCategorias = document.querySelector("#categorias");
-
+    const modal =  new bootstrap.Modal("#modal", {});
     if (selectCategorias) {
         selectCategorias.addEventListener("change", obtenerRecetas);
     }
@@ -18,7 +18,7 @@ function iniciarApp() {
         return;
     }
 
-    const modal = new bootstrap.Modal("#modal", {});
+
     limpiarHTML(modal);
     obtenerCategorias();
 
@@ -75,6 +75,10 @@ function iniciarApp() {
         pageItem.addEventListener("click", function () {
             const newPageNumber = parseInt(this.dataset.pageNumber);
             mostrarRecetas(recetas, newPageNumber, itemsPerPage);
+            document.body.style.scrollBehavior = "smooth";
+            window.scrollTo({
+                top: 400
+            });
         });
         paginationContainer.appendChild(pageItem);
     }
@@ -192,7 +196,6 @@ function iniciarApp() {
     }
 
 
-
     function favoriteDoesNotExistsNoBtn(idMeal, icon, strMeal, strMealThumb) {
         console.log("Entering favoriteDoesNotExistsNoBtn. idMeal:", idMeal);
         icon.classList.add("fas");
@@ -205,6 +208,7 @@ function iniciarApp() {
         mostrarToast("Receta añadida correctamente");
         console.log("Exiting favoriteDoesNotExistsNoBtn");
     }
+
     function favoriteExistsBtn(idMeal, btnFavorito, icon) {
         console.log("Entering favoriteExistsBtn. idMeal:", idMeal);
         eliminarFav(idMeal);
@@ -367,22 +371,34 @@ function iniciarApp() {
         return favButton;
     }
 
-    function createToast(toast, toastBody, mensaje, favButton, indexButton) {
-        const newToast = new bootstrap.Toast(toast)
-        toastBody.innerHTML = mensaje + "<br>"
-        toastBody.appendChild(favButton)
-        toastBody.appendChild(indexButton)
+    function createToast(toast, toastBody, mensaje, favButton = null, indexButton = null) {
+        const newToast = new bootstrap.Toast(toast);
+        toastBody.innerHTML = mensaje + "<br>";
+        if (favButton !== null) {
+            toastBody.appendChild(favButton);
+        }
+        if (indexButton !== null) {
+            toastBody.appendChild(indexButton);
+        }
+
         return newToast;
     }
 
     function mostrarToast(mensaje) {
-        const toast = document.querySelector("#toast")
-        const toastBody = document.querySelector(".toast-body")
-        const indexButton = createIndexButtonToast();
-        const favButton = createFavoriteButtonToast();
-        const newToast = createToast(toast, toastBody, mensaje, favButton, indexButton);
-        newToast.show()
+        const toast = document.querySelector("#toast");
+        const toastBody = document.querySelector(".toast-body");
+
+        if (favoritePage) {
+            const indexButton = createIndexButtonToast();
+            const newToast = createToast(toast, toastBody, mensaje, null, indexButton);
+            newToast.show();
+        } else {
+            const favButton = createFavoriteButtonToast();
+            const newToast = createToast(toast, toastBody, mensaje, favButton, null);
+            newToast.show();
+        }
     }
+
 
     function obtainFav() {
         const fav = JSON.parse(localStorage.getItem("recipes"))
